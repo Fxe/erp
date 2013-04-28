@@ -1,6 +1,13 @@
+# VIM
+*~
+
+# JAVA
 *.class
 
 # Package Files #
 *.jar
 *.war
 *.ear
+
+target/
+*/target/**
