@@ -1,4 +1,4 @@
-package dps.uminho.erp;
+package dps.uminho.erp.controllers;
 
 import java.util.ArrayList;
 import java.util.HashSet;

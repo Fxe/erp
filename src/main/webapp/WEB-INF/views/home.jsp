@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ page session="false" %>
 <html>
@@ -10,14 +11,7 @@
 	Hello world!  lol
 </h1>
 
-<form:form method="GET" name="myForm" commandName="exampleForm" action="#">
-<form:input path="name1"/>
-<form:select path="country">
-	<form:option value="-" label="--Select Country"/>
-	<form:options items="${data}"/>
-</form:select>
-</form:form>
-
+<img src="<s:url value='/resources/img/erp_LOGO.png' />" />
 <P>  The time on the server is ${serverTime}. </P>
 </body>
 </html>

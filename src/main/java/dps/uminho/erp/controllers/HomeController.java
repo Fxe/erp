@@ -1,4 +1,4 @@
-package dps.uminho.erp;
+package dps.uminho.erp.controllers;
 
 import java.text.DateFormat;
 import java.util.Date;
