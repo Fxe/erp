@@ -3,8 +3,8 @@ package dps.uminho.erp.components;
 public class PontoElectrao extends AbstractGeographicLocation {
 
 	private boolean abertoPublico;
-	private int nPontoE;	//nº pontos electrao
-	private int nPontoELamp;//nº pontos electrao lampadas
+	//private int nPontoE;	//nº pontos electrao
+	//private int nPontoELamp;//nº pontos electrao lampadas
 	
 	public PontoElectrao(int id, int localization_id, int operatorType_id,
 			String name, String morada, String codigoPostal) {
