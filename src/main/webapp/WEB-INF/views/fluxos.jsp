@@ -1,9 +1,9 @@
 <%@taglib prefix="core" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="s"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Untitled Document</title>
 <script src="<s:url value='/resources/SpryAssets/SpryMenuBar.js' />" type="text/javascript"></script>
 <link href="<s:url value='/resources/SpryAssets/SpryMenuBarHorizontal.css' />" rel="stylesheet" type="text/css" />
@@ -14,32 +14,8 @@
 }
 .bottom {
 }
-      html, body, #map-canvas {
-        margin: 0;
-        padding: 0;
-        width: 1000px;
-        height: 556px;
-      }
 </style>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-    <script>
-var map;
-function initialize() {
-  var mapOptions = {
-    zoom: 8,
-    center: new google.maps.LatLng(-34.397, 150.644),
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
-  map = new google.maps.Map(document.getElementById('map-canvas'),
-      mapOptions);
-}
-
-google.maps.event.addDomListener(window, 'load', initialize);
-
-    </script>
 </head>
-
-<body>
 <div class="fundo">
   <ul id="MenuBar1" class="MenuBarHorizontal">
         <li><a href="#">Info</a>        </li>
@@ -101,11 +77,10 @@ Erro:</td>
         </tr>
   </table></form></div>
   <div id="bottom">
-    <p><div id="map-canvas"></div></p>
+    <p><img src="MAPA.png" width="1000" height="556" class="bottom" /></p>
   </div>
 </div>
 <script type="text/javascript">
-//<img src="MAPA.png" width="1000" height="556" class="bottom" />
 var MenuBar1 = new Spry.Widget.MenuBar("MenuBar1", {imgDown:"SpryAssets/SpryMenuBarDownHover.gif", imgRight:"SpryAssets/SpryMenuBarRightHover.gif"});
 </script>
 </body>
