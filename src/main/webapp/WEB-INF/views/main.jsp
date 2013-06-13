@@ -5,10 +5,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Untitled Document</title>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="<s:url value='/resources/SpryAssets/SpryMenuBar.js' />" type="text/javascript"></script>
 <script src="<s:url value='/resources/SpryAssets/SpryTabbedPanels.js' />" type="text/javascript"></script>
+<script src="<s:url value="/resources/js/main.js" />" type="text/javascript" ></script>
 <link href="<s:url value='/resources/SpryAssets/SpryMenuBarHorizontal.css' />" rel="stylesheet" type="text/css" />
 <link href="<s:url value='/resources/SpryAssets/SpryTabbedPanels.css' />" rel="stylesheet" type="text/css" />
+
     <style>
       html, body, #map-canvas {
         margin: 0;
@@ -112,8 +115,8 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
         <div class="TabbedPanelsContentGroup">
           <div class="TabbedPanelsContent">
             <div class="barra_lateral">
-              <form name="form" id="form">
-                <select name="jumpMenu" id="jumpMenu" onchange="MM_jumpMenu('parent',this,0)">
+           
+                <select name="jumpMenu" id="jumpMenu">
                   <option>- Operador Log&#237;stico -</option>
                   <core:forEach items="${opList }" var="opName">
                   	<option>${opName }</option>
@@ -128,7 +131,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                     <input type="radio" name="RadioGroup1" value="radio" id="RadioGroup1_1" />
                     Distrito</label>
                   <br />
-                  <select name="jumpMenu2" id="jumpMenu" onchange="MM_jumpMenu('parent',this,0)">
+                  <select name="jumpMenu2" id="jumpMenu">
                     <option>- Nenhum Filtro Seleccionado -</option>
                     <option>Hello World !</option>
                   </select>
@@ -143,31 +146,36 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 </p>
                 <hr size="20" />
                 <p>
-                  <select name="jumpMenu3" id="jumpMenu" onchange="MM_jumpMenu('parent',this,0)">
-                    <option selected="selected">- Distrito -</option>
+                  <select id="cmb_list_dist">
+                    <option value="-1" selected="selected">- Distrito -</option>
                     <core:forEach items="${distritoList }" var="distName">
                   		<option>${distName }</option>
                   	</core:forEach>
                   </select>
                   <br />
-                  <input type="submit" name="button" id="button" value="+" />
-                  <input type="submit" name="button2" id="button" value="-" />
+                  <input type="button" value="+" onclick="add_dist()" />
                   <br />
                   <br />
-                  <select name="jumpMenu4" id="jumpMenu" onchange="MM_jumpMenu('parent',this,0)">
-                    <option>- Concelho -</option>
+                  <select name="jumpMenu4" id="jumpMenu">
+                    <option value="-1" selected="selected">- Concelho -</option>
                     <core:forEach items="${concelhoList }" var="concName">
                   		<option>${concName }</option>
                   	</core:forEach>
                   </select>
                   <br />
                   <input type="submit" name="button3" id="button" value="+" />
-                  <input type="submit" name="button4" id="button" value="-" />
                 </p>
                 <p>
-                  <textarea name="textarea" id="textarea" cols="30" rows="18"></textarea>
+                  <label for="select"></label>
+					<select size="17" class="listaEscolhas" id="lst_point_group">
+	                    <core:forEach items="${formListDist }" var="formDist">
+	                  		<option>${formDist }</option>
+	                  	</core:forEach>
+					</select>
+                  <br />
+<input type="submit" name="button4" id="button2" value="-" />
                 </p>
-              </form>
+             
             </div>
             <div id="map-canvas"></div>
           </div>
@@ -741,6 +749,8 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
     </div>
   </div>
 </div>
+<div id="info">info</div>
+<div id="erro">error</div>
 <script type="text/javascript">
 var MenuBar1 = new Spry.Widget.MenuBar("MenuBar1", {imgDown:"SpryAssets/SpryMenuBarDownHover.gif", imgRight:"SpryAssets/SpryMenuBarRightHover.gif"});
 var TabbedPanels1 = new Spry.Widget.TabbedPanels("TabbedPanels1");

@@ -35,7 +35,7 @@ public class ERPMySQLInterface implements ERPDataInterface {
         this.databasePass_ = pass;
         this.mysqlHost_ = "localhost";
         this.mysqlPort_ = "3306";
-        //this.initialize();
+        this.initialize();
 	}
     
     public ERPMySQLInterface(String host, int port, String db, String user, String pass) {
@@ -121,7 +121,7 @@ public class ERPMySQLInterface implements ERPDataInterface {
 	public PontoElectrao getPontoElectrao(int id) {
 		PontoElectrao pe = null;
 		String sql = 
-				"SELECT CODPE, CODOP, CODLOCAL, NOME, MORADA, CODPOSTAL, ABERTOPUBLICO FROM pontoelectrao WHERE CODPE = ?;";
+				"SELECT CODPE, CODOP, CODLOCAL, NOME, MORADA, CODPOSTAL, ABERTOPUBLICO, LATITUDE, LONGITUDE FROM pontoelectrao WHERE CODPE = ?;";
 		try  {
 			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
 			sqlStatement.setString( 1, Integer.toString(id));
@@ -134,7 +134,11 @@ public class ERPMySQLInterface implements ERPDataInterface {
 				String MORADA = ret.getString(5);
 				String CODPOSTAL = ret.getString(6);
 				boolean ABERTOPUBLICO = ret.getBoolean(7);
+				double LATITUTE = ret.getDouble(8);
+				double LONGITUTE = ret.getDouble(9);
 				pe = new PontoElectrao(CODPE, CODLOCAL, CODOP, NOME, MORADA, CODPOSTAL, ABERTOPUBLICO);
+				pe.setLongitude(LONGITUTE);
+				pe.setLatitude(LATITUTE);
 			}
 		} catch (SQLException sqlEx) {
 			System.err.println( "ERPMySQLInterface::getPontoElectrao - " + sqlEx.getMessage());
@@ -298,108 +302,108 @@ public class ERPMySQLInterface implements ERPDataInterface {
 	@Override
 	public Set<Integer> getAllLocalizationIds() {
 		Set<Integer> localizationIdSet = new HashSet<Integer> ();
-//		String sql = 
-//				"SELECT CODLOCAL FROM localizacao;";
-//		try  {
-//			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
-//			ResultSet ret = sqlStatement.executeQuery();
-//			while ( ret.next()){
-//				int CODLOCAL = ret.getInt(1);
-//				localizationIdSet.add(CODLOCAL);
-//			}
-//		} catch (SQLException sqlEx) {
-//			System.err.println( "ERPMySQLInterface::getLocalizationInformation - " + sqlEx.getMessage());
-//		}
+		String sql = 
+				"SELECT CODLOCAL FROM localizacao;";
+		try  {
+			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
+			ResultSet ret = sqlStatement.executeQuery();
+			while ( ret.next()){
+				int CODLOCAL = ret.getInt(1);
+				localizationIdSet.add(CODLOCAL);
+			}
+		} catch (SQLException sqlEx) {
+			System.err.println( "ERPMySQLInterface::getLocalizationInformation - " + sqlEx.getMessage());
+		}
 		return localizationIdSet;
 	}
 
 	@Override
 	public Set<Integer> getAllOperatorTypeIds() {
 		Set<Integer> operatorIdSet = new HashSet<Integer> ();
-//		String sql = 
-//				"SELECT CODOP FROM tipooperador;";
-//		try  {
-//			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
-//			ResultSet ret = sqlStatement.executeQuery();
-//			while ( ret.next()){
-//				int CODOP = ret.getInt(1);
-//				operatorIdSet.add(CODOP);
-//			}
-//		} catch (SQLException sqlEx) {
-//			System.err.println( "ERPMySQLInterface::getAllOperatorTypeIds - " + sqlEx.getMessage());
-//		}
+		String sql = 
+				"SELECT CODOP FROM tipooperador;";
+		try  {
+			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
+			ResultSet ret = sqlStatement.executeQuery();
+			while ( ret.next()){
+				int CODOP = ret.getInt(1);
+				operatorIdSet.add(CODOP);
+			}
+		} catch (SQLException sqlEx) {
+			System.err.println( "ERPMySQLInterface::getAllOperatorTypeIds - " + sqlEx.getMessage());
+		}
 		return operatorIdSet;
 	}
 
 	@Override
 	public Set<Integer> getAllPontoElectraoIds() {
 		Set<Integer> pontoElectraoIdSet = new HashSet<Integer> ();
-//		String sql = 
-//				"SELECT CODPE FROM pontoelectrao;";
-//		try  {
-//			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
-//			ResultSet ret = sqlStatement.executeQuery();
-//			while ( ret.next()){
-//				int CODPE = ret.getInt(1);
-//				pontoElectraoIdSet.add(CODPE);
-//			}
-//		} catch (SQLException sqlEx) {
-//			System.err.println( "ERPMySQLInterface::getAllPontoElectraoIds - " + sqlEx.getMessage());
-//		}
+		String sql = 
+				"SELECT CODPE FROM pontoelectrao;";
+		try  {
+			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
+			ResultSet ret = sqlStatement.executeQuery();
+			while ( ret.next()){
+				int CODPE = ret.getInt(1);
+				pontoElectraoIdSet.add(CODPE);
+			}
+		} catch (SQLException sqlEx) {
+			System.err.println( "ERPMySQLInterface::getAllPontoElectraoIds - " + sqlEx.getMessage());
+		}
 		return pontoElectraoIdSet;
 	}
 
 	@Override
 	public Set<Integer> getAllPontoRecolhaIds() {
 		Set<Integer> pontoRecolhaIdSet = new HashSet<Integer> ();
-//		String sql = 
-//				"SELECT CODPR FROM pontorecolha;";
-//		try  {
-//			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
-//			ResultSet ret = sqlStatement.executeQuery();
-//			while ( ret.next()){
-//				int CODPR = ret.getInt(1);
-//				pontoRecolhaIdSet.add(CODPR);
-//			}
-//		} catch (SQLException sqlEx) {
-//			System.err.println( "ERPMySQLInterface::getAllPontoRecolhaIds - " + sqlEx.getMessage());
-//		}
+		String sql = 
+				"SELECT CODPR FROM pontorecolha;";
+		try  {
+			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
+			ResultSet ret = sqlStatement.executeQuery();
+			while ( ret.next()){
+				int CODPR = ret.getInt(1);
+				pontoRecolhaIdSet.add(CODPR);
+			}
+		} catch (SQLException sqlEx) {
+			System.err.println( "ERPMySQLInterface::getAllPontoRecolhaIds - " + sqlEx.getMessage());
+		}
 		return pontoRecolhaIdSet;
 	}
 
 	@Override
 	public Set<Integer> getAllCentroRecepcaoIds() {
 		Set<Integer> centroRecepcaoIdSet = new HashSet<Integer> ();
-//		String sql = 
-//				"SELECT CODCR FROM centrorecepcao;";
-//		try  {
-//			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
-//			ResultSet ret = sqlStatement.executeQuery();
-//			while ( ret.next()){
-//				int CODCR = ret.getInt(1);
-//				centroRecepcaoIdSet.add(CODCR);
-//			}
-//		} catch (SQLException sqlEx) {
-//			System.err.println( "ERPMySQLInterface::getAllCentroRecepcaoIds - " + sqlEx.getMessage());
-//		}
+		String sql = 
+				"SELECT CODCR FROM centrorecepcao;";
+		try  {
+			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
+			ResultSet ret = sqlStatement.executeQuery();
+			while ( ret.next()){
+				int CODCR = ret.getInt(1);
+				centroRecepcaoIdSet.add(CODCR);
+			}
+		} catch (SQLException sqlEx) {
+			System.err.println( "ERPMySQLInterface::getAllCentroRecepcaoIds - " + sqlEx.getMessage());
+		}
 		return centroRecepcaoIdSet;
 	}
 
 	@Override
 	public Set<Integer> getAllOperadorLogisticoIds() {
 		Set<Integer> operadorLogisticoIdSet = new HashSet<Integer> ();
-//		String sql = 
-//				"SELECT CODOL FROM operadorlogistico;";
-//		try  {
-//			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
-//			ResultSet ret = sqlStatement.executeQuery();
-//			while ( ret.next()){
-//				int CODOL = ret.getInt(1);
-//				operadorLogisticoIdSet.add(CODOL);
-//			}
-//		} catch (SQLException sqlEx) {
-//			System.err.println( "ERPMySQLInterface::getAllOperadorLogisticoIds - " + sqlEx.getMessage());
-//		}
+		String sql = 
+				"SELECT CODOL FROM operadorlogistico;";
+		try  {
+			PreparedStatement sqlStatement = this.connection_.prepareStatement(sql);
+			ResultSet ret = sqlStatement.executeQuery();
+			while ( ret.next()){
+				int CODOL = ret.getInt(1);
+				operadorLogisticoIdSet.add(CODOL);
+			}
+		} catch (SQLException sqlEx) {
+			System.err.println( "ERPMySQLInterface::getAllOperadorLogisticoIds - " + sqlEx.getMessage());
+		}
 		return operadorLogisticoIdSet;
 	}
 
