@@ -1,5 +1,6 @@
 package dps.uminho.erp.controllers;
 
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,8 @@ import dps.uminho.erp.components.OperadorLogistico;
 import dps.uminho.erp.config.StaticConfigValues;
 import dps.uminho.erp.io.ERPDataInterface;
 import dps.uminho.erp.io.mysql.ERPMySQLInterface;
+import dps.uminho.erp.components.mapa_manipulation.*;
+
 
 @Controller
 public class MainController {
@@ -41,6 +44,10 @@ public class MainController {
 		this.populateData();
 	}
 	
+
+
+	
+	
 	@RequestMapping(value = "/main/", method = RequestMethod.GET)
 	public String main(Model page) {
 		logger.info("Main Page Fired !");
@@ -61,8 +68,21 @@ public class MainController {
 		page.asMap().put("distritoList", distritoList);
 		page.asMap().put("concelhoList", concelhoList);
 		
+		Points p1 = new Points (50.0000,25.0000);
+		Points p2 = new Points (-4.0000,-25.0000);
+		
+		Points_Manipulation list = new Points_Manipulation();
+		
+		list.getGroup_points().add(p1);
+		list.getRoutes().add(p2);
+		
+		page.addAttribute("latitude",list.toStringGroupPoints());
+		page.addAttribute("longitude",list.toStringRoutes());
+		
 		return "main";
 	}
+	
+	
 	
 	private void populateData() {
 		for (Integer olId : dataSource.getAllOperadorLogisticoIds()) {
