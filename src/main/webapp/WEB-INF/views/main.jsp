@@ -19,15 +19,63 @@
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
     <script>
 var map;
-function initialize() {
-  var mapOptions = {
-    zoom: 8,
-    center: new google.maps.LatLng(-34.397, 150.644),
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
-  map = new google.maps.Map(document.getElementById('map-canvas'),
-      mapOptions);
+
+function readPoints(){
+	var latitude = JSON.stringify(${latitude})
+	var longitude = JSON.stringify(${longitude})
+	var array_latitude = JSON.parse(latitude)
+	var array_longitude = JSON.parse(longitude)
+	var latlng_array = new Array();
+	var size = 2;
+	
+	for(var i = 0; i < size; i++)
+	{
+		latlng_array[i] = new google.maps.LatLng(array_latitude.array[i],array_longitude.array[i]);
+	}
+	return latlng_array;
 }
+
+function markPoints(map,latlng_array)
+{
+	  var marker_array = new Array()
+	  var size = latlng_array.length
+	  
+	  for(var i = 0; i < size; i++)
+		{
+			 marker_array[i] = new google.maps.Marker({
+				position: latlng_array[i],
+				map: map, 
+				title:""
+			}); 
+		}
+	  return marker_array
+}
+
+
+function initialize() {
+	
+	
+	var size = 2;
+	
+		
+	var latlng_array = readPoints();
+	
+  	var mapOptions = 
+  	{
+   	 	zoom: 2,
+    	center: new google.maps.LatLng(-34.397, 150.644),
+    	mapTypeId: google.maps.MapTypeId.ROADMAP
+  	};
+  
+  
+  	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  
+  	var marker_array = markPoints(map,latlng_array);
+  	
+
+  
+}
+
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
