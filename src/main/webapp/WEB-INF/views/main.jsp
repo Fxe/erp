@@ -8,7 +8,6 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="<s:url value='/resources/SpryAssets/SpryMenuBar.js' />" type="text/javascript"></script>
 <script src="<s:url value='/resources/SpryAssets/SpryTabbedPanels.js' />" type="text/javascript"></script>
-<script src="<s:url value="/resources/js/main.js" />" type="text/javascript" ></script>
 <link href="<s:url value='/resources/SpryAssets/SpryMenuBarHorizontal.css' />" rel="stylesheet" type="text/css" />
 <link href="<s:url value='/resources/SpryAssets/SpryTabbedPanels.css' />" rel="stylesheet" type="text/css" />
 
@@ -22,18 +21,30 @@
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
     <script>
 var map;
+var marker_array = [];
 
-function readPoints(){
-	var latitude = JSON.stringify(${latitude})
-	var longitude = JSON.stringify(${longitude})
-	var array_latitude = JSON.parse(latitude)
-	var array_longitude = JSON.parse(longitude)
+/*
+ * points referes to a list of points without any meaning between them.
+   routes referes to a list of points that below to a given route.
+ */
+
+function readPoints()
+{
+	var points = JSON.stringify(${points})	// Conver string to Json
+	var array_points = $.parseJSON(points)	
 	var latlng_array = new Array();
-	var size = 2;
+	var size = 0;
 	
-	for(var i = 0; i < size; i++)
+	// {K1:[P1,P2,P3], K2:[P1,P2,P3]... KN:...}
+	for (key in array_points)
 	{
-		latlng_array[i] = new google.maps.LatLng(array_latitude.array[i],array_longitude.array[i]);
+		size = array_points[key].length
+	
+		// For each group of points mark them on the map
+		for(var i = 0; i < size; i+=2)
+		{
+			latlng_array[i] = new google.maps.LatLng(array_points[key][i],array_points[key][i+1]);
+		}
 	}
 	return latlng_array;
 }
@@ -48,7 +59,7 @@ function markPoints(map,latlng_array)
 			 marker_array[i] = new google.maps.Marker({
 				position: latlng_array[i],
 				map: map, 
-				title:""
+				title:"",
 			}); 
 		}
 	  return marker_array
@@ -58,29 +69,122 @@ function markPoints(map,latlng_array)
 function initialize() {
 	
 	
-	var size = 2;
-	
-		
-	var latlng_array = readPoints();
-	
   	var mapOptions = 
   	{
-   	 	zoom: 2,
-    	center: new google.maps.LatLng(-34.397, 150.644),
+   	 	zoom: 6,
+    	center: new google.maps.LatLng(39.30, -8.0),
     	mapTypeId: google.maps.MapTypeId.ROADMAP
   	};
   
   
-  	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-  
-  	var marker_array = markPoints(map,latlng_array);
+  	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);	// Creat Map
   	
-
+  	
+  	var latlng_array = readPoints();	// Get array of Points to mark on the map
   
+  	marker_array = markPoints(map,latlng_array);	// Mark points on the map
+  	
+}
+
+
+function readPoints2(response)
+{
+	var array_points = $.parseJSON(response)	
+	var latlng_array = new Array();
+	var size = 0;
+	
+	// {K1:[P1,P2,P3], K2:[P1,P2,P3]... KN:...}
+	for (key in array_points)
+	{
+		size = array_points[key].length
+	
+		// For each group of points mark them on the map
+		for(var i = 0; i < size; i+=2)
+		{
+			latlng_array[i] = new google.maps.LatLng(array_points[key][i],array_points[key][i+1]);
+		}
+	}
+	return latlng_array;
+}
+
+
+
+function add_dist() {
+	var dist = $('#cmb_list_dist').val();
+	if ( dist != -1) {
+		//alert(dist);
+		$.ajax({
+			type: "GET",
+			url: "http://localhost:8080/erp/main/addDist.ajax",
+			data: "dist=" + dist,
+			success: function(response) {
+				//we have the response
+				if (response.status = "SUCCESS") {
+					if ( response == 'null') {
+						$('#info').html("Duplicate Element");
+					} else {
+						
+						var latlng_array = readPoints2(response);	// Get array of Points to mark on the map
+						marker_array = markPoints(map,latlng_array);	// Mark points on the map
+						
+						$('#lst_point_group').append('<option>' + dist + '</option>');
+						$('#info').html("LIST = " + response);
+						//alert(response)
+						
+						
+						
+						
+					}
+				} else {
+					errorInfo = "";
+				}
+			},
+			error: function(e) {
+				$('#erro').html("ERROR - " + e.responseText);
+			}
+	  });
+	}
+}
+
+
+function clearOverlays() {
+	  for (var i = 0; i < marker_array.length; i++ ) 
+	  {
+		  marker_array[i].setMap(null);
+	  }
+	  marker_array = [];
+	}
+
+
+function do_clear() {
+	$('#lst_point_group').empty();
+	clearOverlays();
+		//alert(dist);
+		$.ajax({
+			type: "GET",
+			url: "http://localhost:8080/erp/main/clear.ajax",
+			data: "",
+			success: function(response) {
+				//we have the response
+				if (response.status = "SUCCESS") {
+						//var latlng_array = readPoints2(response);	// Get array of Points to mark on the map
+						//var marker_array = markPoints(map,latlng_array);	// Mark points on the map
+						$('#info').html("CLEAR");
+						//alert(response)
+				} else {
+					errorInfo = "";
+				}
+			},
+			error: function(e) {
+				$('#erro').html("ERROR - " + e.responseText);
+			}
+	  });
 }
 
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
+
 
     </script>
 <script type="text/javascript">
@@ -107,9 +211,9 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
       <div id="TabbedPanels1" class="TabbedPanels">
         <ul class="TabbedPanelsTabGroup">
           <li class="TabbedPanelsTab" tabindex="0">Mapa</li>
-          <li class="TabbedPanelsTab" tabindex="0">DirecÃ§Ãµes</li>
-          <li class="TabbedPanelsTab" tabindex="0">Custos (â¬/Km)</li>
-          <li class="TabbedPanelsTab" tabindex="0">Velocidade MÃ©d</li>
+          <li class="TabbedPanelsTab" tabindex="0">Direccoes</li>
+          <li class="TabbedPanelsTab" tabindex="0">Custos (euro /Km)</li>
+          <li class="TabbedPanelsTab" tabindex="0">Velocidade Media</li>
           <li class="TabbedPanelsTab" tabindex="0">Custos Transp / Ton</li>
         </ul>
         <div class="TabbedPanelsContentGroup">
@@ -174,6 +278,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
 					</select>
                   <br />
 <input type="submit" name="button4" id="button2" value="-" />
+<input type="button" value="clear" onclick="do_clear()" />
                 </p>
              
             </div>
@@ -181,7 +286,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
           </div>
           <div class="TabbedPanelsContent">Content 2</div>
           <div class="TabbedPanelsContent">            
-          	<p><strong>Custo para OL de Km percorrido por dia (€/Km)</strong></p>
+          	<p><strong>Custo para OL de Km percorrido por dia (Euro/Km)</strong></p>
             <table width="933" border="1" class="tabela">
               <tr>
                 <td colspan="2" class="tabela"><strong>Viatura: Conjunto articulado 40 ton PB</strong></td>
@@ -190,7 +295,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <tr>
                 <td width="223" class="tabela">(1) Estimativa Km/ano da viatura</td>
                 <td width="256" class="tabela"><input name="textfield11" type="text" id="textfield10" value="84004.8" size="15" maxlength="22" /></td>
-                <td width="204" class="tabela">Preço (€/litro)</td>
+                <td width="204" class="tabela">Preco (Euro/litro)</td>
                 <td width="284" class="tabela"><input name="textfield17" type="text" id="textfield16" value="0.8" size="15" maxlength="22" /></td>
               </tr>
               <tr>
@@ -201,21 +306,21 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 %</td>
               </tr>
               <tr>
-                <td class="tabela">Dias úteis de trabalho anual</td>
+                <td class="tabela">Dias uteis de trabalho anual</td>
                 <td class="tabela"><input name="textfield13" type="text" id="textfield12" value="215" size="15" maxlength="22" /></td>
-                <td class="tabela">(3) Preço sem IVA (€/litro)</td>
+                <td class="tabela">(3) Preco sem IVA (Euro /litro)</td>
                 <td class="tabela"><input name="textfield19" type="text" id="textfield19" value="0.6667" size="15" maxlength="22" /></td>
               </tr>
               <tr>
                 <td class="tabela">Horas normais de trabalho anual</td>
                 <td class="tabela"><input name="textfield14" type="text" id="textfield13" value="1720" size="15" maxlength="22" /></td>
-                <td class="tabela">Consumo médio (litros/100km)</td>
+                <td class="tabela">Consumo medio (litros/100km)</td>
                 <td class="tabela"><input name="textfield20" type="text" id="textfield20" value="15" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td class="tabela">Velocidade média (km/h)</td>
+                <td class="tabela">Velocidade media (km/h)</td>
                 <td class="tabela"><input name="textfield15" type="text" id="textfield14" value="48.84" size="15" maxlength="22" /></td>
-                <td class="tabela">Custo/km (€)</td>
+                <td class="tabela">Custo/km (Euro )</td>
                 <td class="tabela"><input name="textfield21" type="text" id="textfield21" value="0.1" size="15" maxlength="22" /></td>
               </tr>
               <tr>
@@ -227,33 +332,33 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 <td colspan="4" class="tabela"><div align="center"><strong>----Fórmulas usadas----</strong></div></td>
               </tr>
               <tr>
-                <td colspan="2" class="tabela">(1) Velocidade média (km/h) <strong>x</strong> Horas normais de trabalho anual</td>
-                <td colspan="2" class="tabela">(3) Preço (€/litro) <strong>/</strong> (1 - Preço sem IVA (€/litro))</td>
+                <td colspan="2" class="tabela">(1) Velocidade media (km/h) <strong>x</strong> Horas normais de trabalho anual</td>
+                <td colspan="2" class="tabela">(3) Preco (Euro /litro) <strong>/</strong> (1 - Preco sem IVA (Euro /litro))</td>
               </tr>
               <tr>
-                <td colspan="2" class="tabela">(2) Estimativa km/ano da viatura <strong>/</strong> Dias úteis de trabalho anual</td>
-                <td colspan="2" class="tabela">(4) Preço sem IVA (€/litro) <strong>x</strong> Consumo médio (litros/100km) <strong>/</strong> 100</td>
+                <td colspan="2" class="tabela">(2) Estimativa km/ano da viatura <strong>/</strong> Dias uteis de trabalho anual</td>
+                <td colspan="2" class="tabela">(4) Preco sem IVA (Euro /litro) <strong>x</strong> Consumo medio (litros/100km) <strong>/</strong> 100</td>
               </tr>
             </table>
             <p class="tabela">&nbsp;</p>
             <table width="978" class="tabela">
               <tr>
-                <td width="272">Taxa de inflação (% face a Fev - 08)</td>
+                <td width="272">Taxa de inflacão (% face a Fev - 08)</td>
                 <td width="114"><input name="textfield23" type="text" id="textfield68" size="15" maxlength="22" />                </td>
                 <td width="576"><input name="textfield23" type="text" id="textfield69" size="15" maxlength="22" />                </td>
               </tr>
               <tr>
-                <td colspan="3">(Indice de preços no consumidor / Taxa de inflação (% face a Fev - 08)) - 1</td>
+                <td colspan="3">(Indice de precos no consumidor / Taxa de inflacão (% face a Fev - 08)) - 1</td>
               </tr>
             </table>
             <table width="979">
               <tr class="tabela">
-                <td colspan="4"><strong>Síntese de custos variáveis e fixos de operação da viatura</strong></td>
+                <td colspan="4"><strong>Síntese de custos variaveis e fixos de operacão da viatura</strong></td>
               </tr>
               <tr>
                 <td class="tabela">Rubrica</td>
-                <td class="tabela">(5) €/Km</td>
-                <td class="tabela">(6) €/Ano</td>
+                <td class="tabela">(5) Euro /Km</td>
+                <td class="tabela">(6) Euro /Ano</td>
                 <td class="tabela">(7) % do Total</td>
               </tr>
               <tr>
@@ -275,31 +380,31 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 <td class="tabela"><input name="textfield32" type="text" id="textfield32" value="0" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td class="tabela">Manutenção (0.0734)</td>
+                <td class="tabela">Manutencão (0.0734)</td>
                 <td class="tabela"><input name="textfield33" type="text" id="textfield33" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield34" type="text" id="textfield34" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield35" type="text" id="textfield35" value="0" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td class="tabela">Trânsitos (0.0572)</td>
+                <td class="tabela">Transitos (0.0572)</td>
                 <td class="tabela"><input name="textfield36" type="text" id="textfield36" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield37" type="text" id="textfield37" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield38" type="text" id="textfield38" value="0" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td class="tabela">Salários e encargos (0.02)</td>
+                <td class="tabela">Salarios e encargos (0.02)</td>
                 <td class="tabela"><input name="textfield39" type="text" id="textfield39" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield40" type="text" id="textfield40" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield41" type="text" id="textfield41" value="0" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td class="tabela">Total custos variáveis</td>
+                <td class="tabela">Total custos variaveis</td>
                 <td class="tabela"><input name="textfield42" type="text" id="textfield42" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield43" type="text" id="textfield43" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield44" type="text" id="textfield44" value="0" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td class="tabela">Salários e encargos</td>
+                <td class="tabela">Salarios e encargos</td>
                 <td class="tabela">&nbsp;</td>
                 <td class="tabela"><input name="textfield45" type="text" id="textfield45" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield46" type="text" id="textfield46" value="0" size="15" maxlength="22" /></td>
@@ -317,7 +422,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 <td class="tabela"><input name="textfield50" type="text" id="textfield50" value="0" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td class="tabela">Amortizações</td>
+                <td class="tabela">Amortizacoes</td>
                 <td class="tabela">&nbsp;</td>
                 <td class="tabela"><input name="textfield51" type="text" id="textfield51" value="0" size="15" maxlength="22" /></td>
                 <td class="tabela"><input name="textfield52" type="text" id="textfield52" value="0" size="15" maxlength="22" /></td>
@@ -349,7 +454,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <tr>
                 <td class="tabela">(9) Total Custos</td>
                 <td class="tabela"><input name="textfield62" type="text" id="textfield62" value="0" size="15" maxlength="22" />
-                  €/Km</td>
+                  Euro /Km</td>
                 <td class="tabela">&nbsp;</td>
                 <td class="tabela">&nbsp;</td>
               </tr>
@@ -377,14 +482,14 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <tr>
                 <td class="tabela">(10) Custo</td>
                 <td class="tabela"><input name="textfield66" type="text" id="textfield66" value="0" size="15" maxlength="22" />
-                  €/Km</td>
+                  Euro /Km</td>
                 <td class="tabela">&nbsp;</td>
                 <td class="tabela">&nbsp;</td>
               </tr>
               <tr>
-                <td class="tabela">(11) Preço de venda</td>
+                <td class="tabela">(11) Preco de venda</td>
                 <td class="tabela"><input name="textfield67" type="text" id="textfield67" value="0" size="15" maxlength="22" />
-                  €/Km</td>
+                  Euro /Km</td>
                 <td class="tabela">&nbsp;</td>
                 <td class="tabela">&nbsp;</td>
               </tr>
@@ -400,7 +505,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <td width="465">&nbsp;</td>
             </tr>
             <tr>
-              <td>Dias úteis de trabalho anual</td>
+              <td>Dias uteis de trabalho anual</td>
               <td width="113"><span class="tabela">
                 <input name="textfield22" type="text" id="textfield22" value="215" size="15" maxlength="22" />
               </span></td>
@@ -414,32 +519,32 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <td>&nbsp;</td>
             </tr>
             <tr>
-              <td>Horas normais de trabalho diárias</td>
+              <td>Horas normais de trabalho diarias</td>
               <td width="113"><span class="tabela">
                 <input name="textfield22" type="text" id="textfield22" value="8" size="15" maxlength="22" />
               </span></td>
-              <td class="letrap"> (Horas normais de trabalho anual <strong>/ </strong>Dias úteis de trabalho anual)</td>
+              <td class="letrap"> (Horas normais de trabalho anual <strong>/ </strong>Dias uteis de trabalho anual)</td>
             </tr>
             <tr>
-              <td>Hora almoço</td>
+              <td>Hora almoco</td>
               <td width="113"><span class="tabela">
                 <input name="textfield22" type="text" id="textfield22" value="1" size="15" maxlength="22" />
               </span></td>
               <td>&nbsp;</td>
             </tr>
             <tr>
-              <td>Horas de deslocações anuais</td>
+              <td>Horas de deslocacoes anuais</td>
               <td width="113"><span class="tabela">
                 <input name="textfield22" type="text" id="textfield22" value="1505" size="15" maxlength="22" />
               </span></td>
-              <td class="letrap">(Dias úteis de trabalho anual <strong>x</strong> Horas em deslocações diárias)</td>
+              <td class="letrap">(Dias uteis de trabalho anual <strong>x</strong> Horas em deslocacoes diarias)</td>
             </tr>
             <tr>
-              <td>Velocidade média (Km/h)</td>
+              <td>Velocidade media (Km/h)</td>
               <td width="113"><span class="tabela">
                 <input name="textfield22" type="text" id="textfield22" value="55" size="15" maxlength="22" />
               </span></td>
-              <td class="letrap">(Estimativa Km/ano/viatura <strong>/</strong> Horas de deslocações anuais)</td>
+              <td class="letrap">(Estimativa Km/ano/viatura <strong>/</strong> Horas de deslocacoes anuais)</td>
             </tr>
           </table>
           <table width="997">
@@ -460,7 +565,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <td>&nbsp;</td>
             </tr>
             <tr>
-              <td>Custo €/Km do transporte</td>
+              <td>Custo Euro /Km do transporte</td>
               <td><input name="textfield68" type="text" id="textfield23" value="0" size="10" maxlength="10" /></td>
               <td>&nbsp;</td>
               <td>(2) Recolha total estimada (Kg)</td>
@@ -471,15 +576,15 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
             </tr>
             <tr>
               <td colspan="3">&nbsp;</td>
-              <td>(3) Custo total (€)</td>
+              <td>(3) Custo total (Euro )</td>
               <td><input name="textfield73" type="text" id="textfield74" value="0" size="10" maxlength="10" /></td>
               <td>&nbsp;</td>
             </tr>
             <tr>
               <td class="letrap"><div align="center">Distrito dos PE</div></td>
               <td class="letrap"><div align="center">Nº de PE visitados</div></td>
-              <td class="letrap"><div align="center">Recolha média mensal estimada por local</div></td>
-              <td>(4) Custo por tonelada (€/ton)</td>
+              <td class="letrap"><div align="center">Recolha media mensal estimada por local</div></td>
+              <td>(4) Custo por tonelada (Euro /ton)</td>
               <td><input name="textfield74" type="text" id="textfield75" value="0" size="10" maxlength="10" /></td>
               <td>&nbsp;</td>
             </tr>
@@ -517,7 +622,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <td><div align="center">
                 <input name="textfield78" type="text" id="textfield79" value="0" size="10" maxlength="10" />
               </div></td>
-              <td colspan="3" class="letrap">(2) SOMA (Nº de PE visitados x Recolha média estimada por local) + Recolha estimada</td>
+              <td colspan="3" class="letrap">(2) SOMA (Nº de PE visitados x Recolha media estimada por local) + Recolha estimada</td>
             </tr>
             <tr>
               <td><div align="center">
@@ -529,7 +634,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <td><div align="center">
                 <input name="textfield78" type="text" id="textfield79" value="0" size="10" maxlength="10" />
               </div></td>
-              <td colspan="3" class="letrap">(3) SOMA (Nº de PE visitados x Custo dos pontos Electrão por distrito) + Custo da rota (deslocação entre distritos e CR) + Distância extra percorrida (Km) x Custo (€/Km)</td>
+              <td colspan="3" class="letrap">(3) SOMA (Nº de PE visitados x Custo dos pontos Electrão por distrito) + Custo da rota (deslocacão entre distritos e CR) + Distancia extra percorrida (Km) x Custo (Euro /Km)</td>
             </tr>
             <tr>
               <td><div align="center">
@@ -541,7 +646,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
               <td><div align="center">
                 <input name="textfield78" type="text" id="textfield79" value="0" size="10" maxlength="10" />
               </div></td>
-              <td colspan="3" class="letrap">(4) Custo total (€) / (Recolha total estimada (Kg) / 1000)</td>
+              <td colspan="3" class="letrap">(4) Custo total (Euro ) / (Recolha total estimada (Kg) / 1000)</td>
             </tr>
             <tr>
               <td><div align="center">
@@ -586,7 +691,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
             <tr>
               <td colspan="6"><table width="463">
                 <tr>
-                  <td width="227">Distância extra percorrida (Km)</td>
+                  <td width="227">Distancia extra percorrida (Km)</td>
                   <td width="220">Recolha estimada (Kg)</td>
                 </tr>
                 <tr>
@@ -594,7 +699,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                   <td><input name="textfield89" type="text" id="textfield91" value="0" size="10" maxlength="10" /></td>
                 </tr>
                 <tr>
-                  <td>Custo da recolha extra (€/ton)</td>
+                  <td>Custo da recolha extra (Euro /ton)</td>
                   <td>&nbsp;</td>
                 </tr>
                 <tr>
@@ -610,36 +715,36 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                   <td>&nbsp;</td>
                 </tr>
                 <tr>
-                  <td><span class="letrap">Escolha a distância calculada:</span></td>
+                  <td><span class="letrap">Escolha a distancia calculada:</span></td>
                   <td>&nbsp;</td>
                 </tr>
                 <tr>
-                  <td colspan="2"><span class="letrap">Média: Distância percorrida de acordo com a média de reclha de todos os PE</span></td>
+                  <td colspan="2"><span class="letrap">Media: Distancia percorrida de acordo com a media de reclha de todos os PE</span></td>
                 </tr>
                 <tr>
-                  <td colspan="2"><span class="letrap">Máximo: Distância percorrida caso todos os PEs estivessem cheios</span></td>
+                  <td colspan="2"><span class="letrap">Maximo: Distancia percorrida caso todos os PEs estivessem cheios</span></td>
                 </tr>
                 <tr>
-                  <td colspan="2"><span class="letrap">Mínimo: Distância percorrida de acordo com as médias de recolha de cada PE</span></td>
+                  <td colspan="2"><span class="letrap">Mínimo: Distancia percorrida de acordo com as medias de recolha de cada PE</span></td>
                 </tr>
                 <tr>
                   <td>&nbsp;</td>
                   <td>&nbsp;</td>
                 </tr>
                 <tr>
-                  <td>Distância</td>
+                  <td>Distancia</td>
                   <td><input name="textfield89" type="text" id="textfield93" value="0" size="10" maxlength="10" />
                     Km</td>
                 </tr>
                 <tr>
                   <td>(1) Custo total transporte</td>
                   <td><input name="textfield89" type="text" id="textfield94" value="0" size="10" maxlength="10" />
-                    €</td>
+                    Euro </td>
                 </tr>
                 <tr>
                   <td>(2) Custo por local</td>
                   <td><input name="textfield89" type="text" id="textfield95" value="0" size="10" maxlength="10" />
-                    €</td>
+                    Euro </td>
                 </tr>
                 <tr>
                   <td>&nbsp;</td>
@@ -652,17 +757,17 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 <tr>
                   <td>Custo anual de um motorista</td>
                   <td><input name="textfield89" type="text" id="textfield96" value="0" size="10" maxlength="10" />
-                    €</td>
+                    Euro </td>
                 </tr>
                 <tr>
                   <td>(3) Custo mensal</td>
                   <td><input name="textfield89" type="text" id="textfield97" value="0" size="10" maxlength="10" />
-                    €</td>
+                    Euro </td>
                 </tr>
                 <tr>
-                  <td>(4) Salário/minuto</td>
+                  <td>(4) Salario/minuto</td>
                   <td><input name="textfield89" type="text" id="textfield98" value="0" size="10" maxlength="10" />
-                    €</td>
+                    Euro </td>
                 </tr>
                 <tr>
                   <td>Tempo de descarga</td>
@@ -670,9 +775,9 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                     min</td>
                 </tr>
                 <tr>
-                  <td>(5) Custo por mês</td>
+                  <td>(5) Custo por mes</td>
                   <td><input name="textfield89" type="text" id="textfield100" value="0" size="10" maxlength="10" />
-                    €</td>
+                    Euro </td>
                 </tr>
                 <tr>
                   <td colspan="2">&nbsp;</td>
@@ -681,10 +786,10 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                   <td colspan="2"><div align="center"><span class="letrap">----------Fórmulas usadas----------</span></div></td>
                 </tr>
                 <tr>
-                  <td colspan="2"><span class="letrap">(1) Distância x Preço por Km</span></td>
+                  <td colspan="2"><span class="letrap">(1) Distancia x Preco por Km</span></td>
                 </tr>
                 <tr>
-                  <td colspan="2"><span class="letrap">(2) Custo total de transporte / Nº de PE + Custo de esvaziar um PE + Custo por mês</span></td>
+                  <td colspan="2"><span class="letrap">(2) Custo total de transporte / Nº de PE + Custo de esvaziar um PE + Custo por mes</span></td>
                 </tr>
                 <tr>
                   <td colspan="2"><span class="letrap">(3) Custo anual de um motorista / 12</span></td>
@@ -693,7 +798,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                   <td colspan="2"><span class="letrap">(4) Custo mensal (20*80*60)</span></td>
                 </tr>
                 <tr>
-                  <td colspan="2"><span class="letrap">(5) Salário / minuto x Tempo de descarga (min)</span></td>
+                  <td colspan="2"><span class="letrap">(5) Salario / minuto x Tempo de descarga (min)</span></td>
                 </tr>
                 <tr>
                   <td>&nbsp;</td>
@@ -711,7 +816,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 <td width="476"><input name="textfield3" type="text" id="textfield17" value="84000" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td>Dias úteis de trabalho anual</td>
+                <td>Dias uteis de trabalho anual</td>
                 <td><input name="textfield4" type="text" id="textfield3" value="215" size="15" maxlength="22" /></td>
               </tr>
               <tr>
@@ -719,27 +824,27 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                 <td><input name="textfield5" type="text" id="textfield4" value="1720" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td>Horas normais de trabalho diárias</td>
+                <td>Horas normais de trabalho diarias</td>
                 <td><input name="textfield6" type="text" id="textfield5" value="8" size="15" maxlength="22" /> 
-                  <span class="letrap">(Horas normais de trabalho anual <strong>/</strong>Dias úteis de trabalho anual)</span></td>
+                  <span class="letrap">(Horas normais de trabalho anual <strong>/</strong>Dias uteis de trabalho anual)</span></td>
               </tr>
               <tr>
-                <td>Hora almoço</td>
+                <td>Hora almoco</td>
                 <td><input name="textfield7" type="text" id="textfield6" value="1" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td>Horas em deslocações diárias</td>
+                <td>Horas em deslocacoes diarias</td>
                 <td><input name="textfield8" type="text" id="textfield7" value="7" size="15" maxlength="22" /></td>
               </tr>
               <tr>
-                <td>Horas em deslocações anuais</td>
+                <td>Horas em deslocacoes anuais</td>
                 <td><input name="textfield9" type="text" id="textfield8" value="1505" size="15" maxlength="22" /> 
-                  <span class="letrap">(Dias úteis de trabalho anual <strong>x</strong> Horas em deslocações diárias)</span></td>
+                  <span class="letrap">(Dias uteis de trabalho anual <strong>x</strong> Horas em deslocacoes diarias)</span></td>
               </tr>
               <tr>
-                <td>Velocidade média (km/h)</td>
+                <td>Velocidade media (km/h)</td>
                 <td><input name="textfield10" type="text" id="textfield9" value="55" size="15" maxlength="22" /> 
-                  <span class="letrap">(Estimativa Km/ano/viatura<strong> / </strong>Horas de deslocações anuais)</span></td>
+                  <span class="letrap">(Estimativa Km/ano/viatura<strong> / </strong>Horas de deslocacoes anuais)</span></td>
               </tr>
             </table>
           </div>

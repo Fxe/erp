@@ -69,7 +69,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
           <input name="textfield21" type="text" id="textfield24" value="0.0" size="5" maxlength="5" readonly="readonly" /></td>
         </tr>
         <tr>
-          <td><label for="textfield13">Código Postal</label>
+          <td><label for="textfield13">Codigo Postal</label>
             <input name="textfield14" type="text" id="textfield13" size="8" maxlength="8" />
           <label>
             <input type="checkbox" name="CheckboxGroup1_2" value="checkbox" id="CheckboxGroup1_2" />
@@ -95,7 +95,7 @@ Erro:</td>
         <tr>
           <td><label for="textfield16">Nº PE</label>
           <input name="textfield16" type="text" id="textfield16" size="5" maxlength="5" /></td>
-          <td><label for="textfield20">Nº PE Lâmpadas</label>
+          <td><label for="textfield20">Nº PE Lampadas</label>
             <input name="textfield20" type="text" id="textfield20" size="5" maxlength="5" /></td>
           <td>&nbsp;</td>
         </tr>

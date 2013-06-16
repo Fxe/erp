@@ -41,4 +41,10 @@ public class FormMainMapa {
 	public void setPontoElectraoSet(Set<PontoElectrao> pontoElectraoSet) {
 		this.pontoElectraoSet = pontoElectraoSet;
 	}
+	
+	public void clear() {
+		this.concelhosSet.clear();
+		this.distritosSet.clear();
+		this.pontoElectraoSet.clear();
+	}
 }

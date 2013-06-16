@@ -78,6 +78,7 @@ public class ERPMySQLInterface implements ERPDataInterface {
 	@Override
 	public Localization getLocalizationInformation(int id) {
 		Localization localization = null;
+		
 		String sql = 
 				"SELECT CODLOCAL, CONCELHO, DISTRITO, OBS FROM localizacao WHERE CODLOCAL = ?;";
 		try  {
@@ -94,6 +95,7 @@ public class ERPMySQLInterface implements ERPDataInterface {
 		} catch (SQLException sqlEx) {
 			System.err.println( "ERPMySQLInterface::getLocalizationInformation - " + sqlEx.getMessage());
 		}
+		
 		return localization;
 	}
 	@Override

@@ -32,7 +32,7 @@ public class MainController {
 	private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 	private static ERPDataInterface dataSource = null;
 	
-	private Points_Manipulation list = null;
+	private Points_Manipulation list = new Points_Manipulation();
 	private List<OperadorLogistico> olList = null;
 	private Map<Integer, Localization> locMap = null;
 	private Map<Integer, PontoElectrao> peMap = null;
@@ -67,15 +67,30 @@ public class MainController {
 			if ( loc.getDistrito().equals(distrito)) {
 				peList.add(pe);
 				System.out.println(pe.getLatitude() + " " + pe.getLongitude());
-				Points point = new Points(pe.getLatitude(), pe.getLongitude());
-				//this.list.getGroup_points().add(point);
-				this.list.getRoutes().add(point);
+				Points point = new Points(pe.getLatitude(), pe.getLongitude(), "");
+			    this.list.getGroup_points().add(point);
 			}
 		}
+		System.out.println(list.getTagGroupPoints());
+		System.out.println(list.toStringGroupPoints());
 		logger.info("Match " + peList.size() + " PontoElectrao");
 		return peList;
 	}
 
+	@RequestMapping(value = "/main/clear.ajax", method = RequestMethod.GET)
+	public @ResponseBody String clear(Model model) {
+		
+		System.out.println("lolol");
+		
+		olList.clear();
+		
+		mainForm.clear();
+		
+		list = new Points_Manipulation();
+		
+		return mainForm.getDistritosSet().toString(); //mainForm.getDistritosSet().toString();
+	}
+	
 	@RequestMapping(value = "/main/addDist.ajax", method = RequestMethod.GET)
 	public @ResponseBody String addDistritoToForm(Model model, 
 			@RequestParam(value = "dist", required = true) String dist) {
@@ -86,7 +101,7 @@ public class MainController {
 		
 		mainForm.getPontoElectraoSet().addAll( getPE_FromDistrito(dist));
 		
-		return mainForm.getDistritosSet().toString();
+		return this.list.toStringGroupPoints(); //mainForm.getDistritosSet().toString();
 	}
 	
 	@RequestMapping(value = "/main/addConc.ajax", method = RequestMethod.GET)
@@ -112,10 +127,12 @@ public class MainController {
 		
 		Set<String> distritoList = new HashSet<String>();
 		Set<String> concelhoList = new HashSet<String>();
+		
 		for ( Localization loc : locMap.values()) {
 			distritoList.add(loc.getDistrito());
 			concelhoList.add(loc.getConcelho());
 		}
+		
 		
 		page.asMap().put("opList", opList);
 		page.asMap().put("distritoList", distritoList);
@@ -123,8 +140,18 @@ public class MainController {
 		page.asMap().put("formListDist", mainForm.getDistritosSet());
 		page.asMap().put("formListConc", mainForm.getConcelhosSet());
 		
-		page.addAttribute("latitude",list.toStringGroupPoints());
-		page.addAttribute("longitude",list.toStringRoutes());
+
+		
+		
+	//	Points p1 = new Points(-43.2, 10.0, "");
+//		Points p2 = new Points(-12,12.0,"");
+	//	this.list.getGroup_points().add(p1);
+		//this.list.getGroup_points().add(p2);
+		
+		System.out.println(list.getTagGroupPoints());
+		System.out.println(list.toStringGroupPoints());
+		
+		page.addAttribute(list.getTagGroupPoints(),list.toStringGroupPoints());
 		
 		return "main";
 	}
@@ -146,6 +173,8 @@ public class MainController {
 			PontoElectrao pe = dataSource.getPontoElectrao(peId);
 			this.peMap.put(peId, pe);
 		}
+		
+		
 		logger.info("Loaded " + peMap.size() + " PontoElectrao");
 	}
 }
