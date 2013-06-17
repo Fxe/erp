@@ -125,7 +125,7 @@ function add_dist() {
 					} else {
 						
 						var latlng_array = readPoints2(response);	// Get array of Points to mark on the map
-						marker_array = markPoints(map,latlng_array);	// Mark points on the map
+						marker_array = marker_array.concat(markPoints(map,latlng_array));	// Mark points on the map
 						
 						$('#lst_point_group').append('<option>' + dist + '</option>');
 						$('#info').html("LIST = " + response);

@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -66,15 +69,35 @@ public class MainController {
 			Localization loc = locMap.get( pe.getLocalization_id());
 			if ( loc.getDistrito().equals(distrito)) {
 				peList.add(pe);
-				System.out.println(pe.getLatitude() + " " + pe.getLongitude());
-				Points point = new Points(pe.getLatitude(), pe.getLongitude(), "");
-			    this.list.getGroup_points().add(point);
 			}
 		}
 		System.out.println(list.getTagGroupPoints());
 		System.out.println(list.toStringGroupPoints());
 		logger.info("Match " + peList.size() + " PontoElectrao");
 		return peList;
+	}
+	
+	private String toJSON(List<PontoElectrao> peList) {
+		JSONObject points = new JSONObject();
+		
+		try {
+		
+			JSONArray pointJSArray = new JSONArray();
+			
+			for (PontoElectrao pe : peList) {
+			    pointJSArray.put(pe.getLatitude());
+			    pointJSArray.put(pe.getLongitude());
+			}
+			points.put("points", pointJSArray);
+			
+			System.out.println(points);
+		
+		} catch (JSONException jsEx) {
+			System.err.println("JSEX - " + jsEx.getMessage());
+			return "{\"points\":[]}";
+		}
+		
+		return points.toString();
 	}
 
 	@RequestMapping(value = "/main/clear.ajax", method = RequestMethod.GET)
@@ -98,10 +121,18 @@ public class MainController {
 		if ( !mainForm.getDistritosSet().add(dist)) {
 			return "null";
 		}
+		List<PontoElectrao> peList = getPE_FromDistrito(dist);
+		mainForm.getPontoElectraoSet().addAll( peList);
 		
-		mainForm.getPontoElectraoSet().addAll( getPE_FromDistrito(dist));
+
+		for (PontoElectrao pe : peList) {
+			System.out.println(pe.getLatitude() + " " + pe.getLongitude());
+			Points point = new Points(pe.getLatitude(), pe.getLongitude(), "");
+		    this.list.getGroup_points().add(point);
+		}
+
 		
-		return this.list.toStringGroupPoints(); //mainForm.getDistritosSet().toString();
+		return this.toJSON(peList); //mainForm.getDistritosSet().toString();
 	}
 	
 	@RequestMapping(value = "/main/addConc.ajax", method = RequestMethod.GET)
